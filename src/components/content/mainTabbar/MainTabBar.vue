@@ -25,15 +25,16 @@
 </template>
 
 <script>
-import TabBarItem from "./TabBarItem";
-import TabBar from "./TabBar";
-export default {
-  name: "MainTabBar",
-  components: {
-    TabBar,
-    TabBarItem
+  import TabBar from "../../common/tabbar/TabBar";
+  import TabBarItem from "../../common/tabbar/TabBarItem";
+
+  export default {
+    name: "MainTabBar",
+    components: {
+      TabBar,
+      TabBarItem
+    }
   }
-}
 </script>
 
 <style scoped>
