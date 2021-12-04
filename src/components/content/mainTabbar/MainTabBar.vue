@@ -1,4 +1,3 @@
-<!--suppress ALL -->
 <template>
   <tab-bar>
     <tab-bar-item path="/home" active-color="#ff5777">
@@ -25,8 +24,8 @@
 </template>
 
 <script>
-  import TabBar from "../../common/tabbar/TabBar";
-  import TabBarItem from "../../common/tabbar/TabBarItem";
+  import TabBar from "components/common/tabbar/TabBar";
+  import TabBarItem from "components/common/tabbar/TabBarItem";
 
   export default {
     name: "MainTabBar",
