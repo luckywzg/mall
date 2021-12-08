@@ -39,7 +39,7 @@
 
 
   import {getHomeMultidata,getGoodsData} from "network/home";
-  import {debounce} from "common/utils";
+  import {imageListenerMixin} from "common/mixin";
 
   export default {
     name: "Home",
@@ -89,21 +89,16 @@
       this.getGoodsData('new')
       this.getGoodsData('sell')
     },
+    mixins: [imageListenerMixin],
     mounted() {
-      //2、refresh接收返回过来的函数
-      const refresh = debounce(this.$refs.scroll.refresh, 500)
-      this.$bus.$on('imgItemLoad',() => {
-        // this.$refs.scroll.refresh()
-        //3、使用防抖函数
-        refresh()
-      })
+    },
+    deactivated() {
+      this.saveY = this.$refs.scroll.getSaveY()
+      this.$bus.$off('imgItemLoad', this.imageListener)
     },
     activated() {
       this.$refs.scroll.scrollTo(0, this.saveY, 0)
       this.$refs.scroll.refresh()
-    },
-    deactivated() {
-      this.saveY = this.$refs.scroll.getSaveY()
     },
     methods: {
       /**

@@ -1,6 +1,6 @@
 <template>
   <div class="good-list">
-    <goods-list-item v-for="item in goods" :goodsItem="item">
+    <goods-list-item v-for="item in goods " :goodsItem="item">
     </goods-list-item>
   </div>
 </template>
@@ -19,7 +19,7 @@
           return []
         }
       }
-    },
+    }
   }
 </script>
 

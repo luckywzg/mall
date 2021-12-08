@@ -1,6 +1,6 @@
 <template>
   <div class="goods-item" @click="goodsItemClick">
-    <img :src="goodsItem.show.img" alt="" @load="imgLoad">
+    <img :src="goodsShow" alt="" @load="imgLoad">
     <div class="goods-info">
       <p>{{goodsItem.title}}</p>
       <span class="price">{{goodsItem.price}}</span>
@@ -20,15 +20,17 @@ export default {
       }
     }
   },
+  computed: {
+    goodsShow(){
+      return this.goodsItem.image || this.goodsItem.show.img
+    }
+  },
   methods: {
     imgLoad(){
-      // console.log('imgLoad');
       //使用全局总线
       this.$bus.$emit('imgItemLoad')
     },
     goodsItemClick(){
-      // console.log('---');
-
       this.$router.push('/detail/' + this.goodsItem.iid)
     }
   }

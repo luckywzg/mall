@@ -1,11 +1,15 @@
 <template>
  <div class="detail-goods-info">
-   <div class="start"></div>
-   <div class="detail-info">
-    <span>{{detailInfo.key}}</span>
-    <span>{{detailInfo.desc}}</span>
-  </div>
-   <div class="end"></div>
+   <div class="detail-text">
+     <div class="start"></div>
+     <div class="detail-info">
+       <span>{{detailInfo.key}}</span>
+       <span>{{detailInfo.desc}}</span>
+     </div>
+     <span class="end-before"></span>
+
+     <div class="end"></div>
+   </div>
    <div class="detail-img" >
      <img :src="item" v-for="item in detailImage" @load="imgLoad" alt="">
    </div>
@@ -40,7 +44,6 @@ export default {
     imgLoad(){
       if(++this.imgCounter === this.imgLength){
         this.$emit('imgItemLoad')
-        console.log('--------00');
       }
     }
   },
@@ -55,6 +58,9 @@ export default {
 <style scoped>
   .detail-goods-info {
     position: relative;
+  }
+  .detail-text {
+    margin-bottom: 10px;
   }
   .start {
     width: 80px;
@@ -79,15 +85,13 @@ export default {
   .end {
     width: 80px;
     height: 1px;
-    margin: 10px 0 0 220px;
+    margin: 5px 0 0 220px;
     background-color: #918f8f;
   }
-  .end::after {
-    display: block;
+  .end-before {
+    display: inline-block;
     position: absolute;
-    top: 122px;
     right: 20px;
-    content: '';
     width: 5px;
     height: 5px;
     background-color: black;

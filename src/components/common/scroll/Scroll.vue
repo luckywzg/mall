@@ -57,7 +57,6 @@
       },
       //2、刷新scrollHeight
       refresh() {
-        console.log('----11-');
         this.scroll && this.scroll.refresh()
       },
       //3、上拉加载更多
