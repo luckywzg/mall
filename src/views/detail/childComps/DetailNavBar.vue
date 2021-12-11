@@ -30,6 +30,8 @@
     methods: {
       itemClick(index) {
         this.currentIndex = index
+        //发射事件
+        this.$emit('titleClick', index)
       },
       imgClick(){
         this.$router.back()

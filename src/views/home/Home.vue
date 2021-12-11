@@ -31,7 +31,6 @@
   import TabControl from "components/content/tabControl/TabControl";
   import GoodsList from "components/content/goods/GoodsList";
   import Scroll from "components/common/scroll/Scroll";
-  import BackTop from "components/content/backTop/BackTop";
 
   import HomeSwiper from "./childComps/HomeSwiper";
   import RecommendView from "./childComps/RecommendView";
@@ -40,6 +39,7 @@
 
   import {getHomeMultidata,getGoodsData} from "network/home";
   import {imageListenerMixin} from "common/mixin";
+  import {BackTopMain} from "../../common/mixin";
 
   export default {
     name: "Home",
@@ -48,7 +48,6 @@
       GoodsList,
       TabControl,
       Scroll,
-      BackTop,
       HomeSwiper,
       RecommendView,
       FeatureView,
@@ -89,7 +88,7 @@
       this.getGoodsData('new')
       this.getGoodsData('sell')
     },
-    mixins: [imageListenerMixin],
+    mixins: [imageListenerMixin, BackTopMain],
     mounted() {
     },
     deactivated() {
@@ -119,12 +118,9 @@
         this.$refs.tabControl1.currentIndex = index
         this.$refs.tabControl2.currentIndex = index
       },
-      backClick(){
-        this.$refs.scroll.scrollTo(0, 0)
-      },
       contentScroll(position){
-        this.isShowBackTop = (-position.y) > 1000
-        this.isShowTabControl = (-position.y) > this.offsetTop
+        //回到顶部
+        this.BackTopContentScroll(position)
       },
       loadMore(){
         //当前处于的类型再次请求数据

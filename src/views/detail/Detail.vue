@@ -1,16 +1,23 @@
 <template>
   <div id="detail">
-    <detail-nav-bar />
-    <scroll class="content" ref="scroll">
+    <!--接收从导航发射过来的事件-->
+    <detail-nav-bar @titleClick="titleClick" ref="detailNav" />
+    <!--接收从scroll中发射的scroll事件，
+    并且传递probeType值（需要动态监听否则可能会是字符串），否则默认不监听滚动-->
+    <scroll class="content" ref="scroll"
+            :probe-type="3"
+            @scroll="contentScroll">
       <detail-swiper :image-top="imageTop" />
       <detail-base-info :goods="goods" />
       <detail-shop-base-info :shop="shop" />
       <detail-goods-info :detail-info="detailInfo" :detail-image="detailImage"
                          @imgItemLoad="imgItemLoad"/>
-      <detail-goods-params :goods-params="goodsParams" />
-      <detail-comment-info :comment-info="commentInfo" />
-      <goods-list :goods="recommend" />
+      <detail-goods-params ref="params" :goods-params="goodsParams" />
+      <detail-comment-info ref="comment" :comment-info="commentInfo" />
+      <goods-list ref="recommend" :goods="recommend" />
     </scroll>
+    <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
+    <detail-bottom-bar />
   </div>
 </template>
 
@@ -22,17 +29,21 @@
   import DetailGoodsInfo from "./childComps/DetailGoodsInfo";
   import DetailGoodsParams from "./childComps/DetailGoodsParams";
   import DetailCommentInfo from "./childComps/DetailCommentInfo";
+  import DetailBottomBar from "./childComps/DetailBottomBar";
 
-  import Scroll from "components/common/scroll/Scroll";
+  import Scroll from "../../components/common/scroll/Scroll";
   import GoodsList from "../../components/content/goods/GoodsList";
 
   import {getImageTop,getRecommend,Goods,Shop,Comment} from "network/detail";
   import {GoodsParams} from "network/detail";
-  import {imageListenerMixin} from "../../common/mixin";
-
+  import {debounce} from "common/utils";
+  import {imageListenerMixin} from "common/mixin";
+  import BackTop from "../../components/content/backTop/BackTop";
+  import {BackTopMain} from "../../common/mixin";
   export default {
     name: "Detail",
     components: {
+      BackTop,
       DetailNavBar,
       DetailSwiper,
       DetailBaseInfo,
@@ -40,6 +51,7 @@
       DetailGoodsInfo,
       DetailGoodsParams,
       DetailCommentInfo,
+      DetailBottomBar,
       Scroll,
       GoodsList
     },
@@ -53,10 +65,14 @@
         detailImage: [],
         goodsParams: {},
         commentInfo: {},
-        recommend: []
+        recommend: [],
+        //导航点击跳转对应内容保存的可视高度offsetTop数组
+        titleTopYs: [],
+        getTitleTopYs: null,
+        currentIndex: 0
       }
     },
-    mixins: [imageListenerMixin],
+    mixins: [imageListenerMixin, BackTopMain],
     mounted() {
     },
     destroyed() {
@@ -81,6 +97,7 @@
         this.goodsParams = new GoodsParams(data.itemParams.info, data.itemParams.rule)
         //7、获取评论信息
         this.commentInfo = new Comment(data.rate)
+
       })
       //3、请求详情推荐数据
       getRecommend(this.iid).then(res => {
@@ -92,6 +109,55 @@
     methods: {
       imgItemLoad(){
         this.newRefresh()
+        //在这里获取正确的offsetTop
+        //对要获取数据的函数进行一层防抖包装
+        this.getTitleTopYs = debounce( () => {
+          this.titleTopYs = []
+          this.titleTopYs.push(0)
+          this.titleTopYs.push(this.$refs.params.$el.offsetTop);
+          this.titleTopYs.push(this.$refs.comment.$el.offsetTop)
+          this.titleTopYs.push(this.$refs.recommend.$el.offsetTop)
+          this.titleTopYs.push(Number.MAX_VALUE)
+          console.log(this.titleTopYs);
+        }, 200)
+        this.getTitleTopYs()
+      },
+      titleClick(index) {
+        this.$refs.scroll.scrollTo(0, (-this.titleTopYs[index] + 44), 200)
+      },
+      contentScroll(position){
+        const positionY = (-position.y) + 44
+        //将获取到的y值和标题的可视区域进行判断
+        //[0, 5610, 6434, 6746]
+        //当y值大于等于0且小于5610时，index值为0
+        //当y值大于等于5610且小于6434时，index值为1
+        //当y值大于等于6434且小于6746时，index值为2
+        //当y值大于等于6746时，index值为3
+
+        //普通做法：
+        // let length = this.titleTopYs.length
+        // for(let i in this.titleTopYs){
+        //   //不做转换会是字符串类型
+        //   i = i * 1
+        //   if(this.currentIndex !== i && ((i < length - 1 && positionY >= this.titleTopYs[i] && positionY < this.titleTopYs[i+1]) || (i === length -1 && positionY >= this.titleTopYs[i]))) {
+        //     console.log(i);
+        //     console.log(typeof i);
+        //     this.currentIndex = i
+        //     this.$refs.detailNav.currentIndex = this.currentIndex
+        //   }
+        // }
+
+        //hack做法：往this.titleTopY数组中追加一个非常大的值，这样就能俩俩判断
+        //[0, 5610, 6434, 6746] => [0, 5610, 6434, 6746, Number.MAX_VALUE]
+        for(let i in this.titleTopYs) {
+          i = i * 1
+          if(this.currentIndex !== i && positionY >= this.titleTopYs[i] && positionY < this.titleTopYs[i+1]) {
+            this.currentIndex = i
+            this.$refs.detailNav.currentIndex = this.currentIndex
+          }
+        }
+        //回到顶部
+        this.BackTopContentScroll(position)
       }
     },
   }
@@ -105,7 +171,7 @@
     height: 100vh;
   }
   .content {
-    height: calc(100% - 44px);
+    height: calc(100% - 44px - 49px);
     overflow: hidden;
   }
 </style>
