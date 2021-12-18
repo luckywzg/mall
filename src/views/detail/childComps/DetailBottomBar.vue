@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="bottom-right flex">
-      <div class="bottom-cart flex">
+      <div class="bottom-cart flex" @click="addCart">
         <span>加入购物车</span>
       </div>
       <div class="bottom-buy flex">
@@ -26,9 +26,14 @@
 </template>
 
 <script>
-export default {
-  name: "DetailBottomBar"
-}
+  export default {
+    name: "DetailBottomBar",
+    methods: {
+      addCart(){
+        this.$emit('addCartTo')
+      }
+    }
+  }
 </script>
 
 <style scoped>

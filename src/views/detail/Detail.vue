@@ -2,6 +2,9 @@
   <div id="detail">
     <!--接收从导航发射过来的事件-->
     <detail-nav-bar @titleClick="titleClick" ref="detailNav" />
+    <!--<div>-->
+    <!--  {{this.$store.state.cartList}}-->
+    <!--</div>-->
     <!--接收从scroll中发射的scroll事件，
     并且传递probeType值（需要动态监听否则可能会是字符串），否则默认不监听滚动-->
     <scroll class="content" ref="scroll"
@@ -17,7 +20,7 @@
       <goods-list ref="recommend" :goods="recommend" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
-    <detail-bottom-bar />
+    <detail-bottom-bar @addCartTo="addCartTo"/>
   </div>
 </template>
 
@@ -118,7 +121,6 @@
           this.titleTopYs.push(this.$refs.comment.$el.offsetTop)
           this.titleTopYs.push(this.$refs.recommend.$el.offsetTop)
           this.titleTopYs.push(Number.MAX_VALUE)
-          console.log(this.titleTopYs);
         }, 200)
         this.getTitleTopYs()
       },
@@ -158,6 +160,16 @@
         }
         //回到顶部
         this.BackTopContentScroll(position)
+      },
+      addCartTo() {
+        let product = {}
+        product.iid = this.iid
+        product.image = this.imageTop[0]
+        product.title = this.goods.title
+        product.desc = this.goods.desc
+        product.price = this.goods.lowNowPrice
+        //将商品信息添加到购物车使用commit
+        this.$store.dispatch('addCart', product)
       }
     },
   }
