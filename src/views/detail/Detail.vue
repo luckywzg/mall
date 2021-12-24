@@ -2,9 +2,6 @@
   <div id="detail">
     <!--接收从导航发射过来的事件-->
     <detail-nav-bar @titleClick="titleClick" ref="detailNav" />
-    <!--<div>-->
-    <!--  {{this.$store.state.cartList}}-->
-    <!--</div>-->
     <!--接收从scroll中发射的scroll事件，
     并且传递probeType值（需要动态监听否则可能会是字符串），否则默认不监听滚动-->
     <scroll class="content" ref="scroll"
@@ -36,13 +33,14 @@
 
   import Scroll from "../../components/common/scroll/Scroll";
   import GoodsList from "../../components/content/goods/GoodsList";
+  import BackTop from "../../components/content/backTop/BackTop";
 
   import {getImageTop,getRecommend,Goods,Shop,Comment} from "network/detail";
   import {GoodsParams} from "network/detail";
   import {debounce} from "common/utils";
   import {imageListenerMixin} from "common/mixin";
-  import BackTop from "../../components/content/backTop/BackTop";
   import {BackTopMain} from "../../common/mixin";
+  import { mapActions } from "vuex"
   export default {
     name: "Detail",
     components: {
@@ -56,7 +54,7 @@
       DetailCommentInfo,
       DetailBottomBar,
       Scroll,
-      GoodsList
+      GoodsList,
     },
     data(){
       return {
@@ -72,7 +70,7 @@
         //导航点击跳转对应内容保存的可视高度offsetTop数组
         titleTopYs: [],
         getTitleTopYs: null,
-        currentIndex: 0
+        currentIndex: 0,
       }
     },
     mixins: [imageListenerMixin, BackTopMain],
@@ -87,7 +85,7 @@
       //2、请求详情数据
       getImageTop(this.iid).then(res => {
         const data = res.data.result
-          //2、获取轮播图片
+        //2、获取轮播图片
         this.imageTop = res.data.result.itemInfo.topImages
         //3、获取商品信息
         this.goods = new Goods(data.itemInfo, data.columns, data.shopInfo.services)
@@ -161,6 +159,7 @@
         //回到顶部
         this.BackTopContentScroll(position)
       },
+      ...mapActions(["addCart"]),
       addCartTo() {
         let product = {}
         product.iid = this.iid
@@ -169,7 +168,21 @@
         product.desc = this.goods.desc
         product.price = this.goods.lowNowPrice
         //将商品信息添加到购物车使用commit
-        this.$store.dispatch('addCart', product)
+        this.addCart(product).then(res => {
+          this.$toast.show(res, 1500)
+        })
+        // this.$store.dispatch('addCart', product).then(res => {
+        //   console.log(res);
+        // })
+        // console.log(res);
+        // this.message = res
+        // this.isShow = true
+        // setTimeout(() => {
+        //   this.message = ''
+        //   this.isShow = false
+        // },2000)
+        // console.log(this.$toast);
+        // console.log(this.$toast.methods.show);
       }
     },
   }
